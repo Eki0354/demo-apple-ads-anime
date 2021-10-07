@@ -28,8 +28,15 @@
 
   // 设定每帧滚动高度，控制滚动速度
   const hpf = 20
-  // 设定每帧渲染毫秒数，控制播放速度
-  const mspf = 33
+  // 设定每帧渲染秒数，控制播放速度（此处测试后使用一般电影帧数）
+  const spf = 1 / 23.976
+
+  // 上一帧时间节点
+  let lastFramStamp = 0
+
+  const delayTime = [
+    20, 20, 20, 20, 20, 20, 15, 15, 15, 15, 15, 15, 10, 10, 10, 10, 10, 10,
+  ]
 
   onMount(async () => {
     await loadImages()
@@ -121,16 +128,33 @@
     })
   }
 
-  function play(timestamp) {
+  function play(elapsedTime) {
+    let isRenderFrame = true
+    if (!elapsedTime || !lastFramStamp) {
+      lastFramStamp = elapsedTime
+    } else if (elapsedTime - lastFramStamp >= spf) {
+      lastFramStamp = elapsedTime - spf
+    } else {
+      isRenderFrame = false
+    }
+
     const isProgressing = currentFrameIndex !== targetFrameIndex
 
-    if (isProgressing) {
+    if (isProgressing && isRenderFrame) {
       currentFrameIndex < targetFrameIndex
         ? currentFrameIndex++
         : currentFrameIndex--
       ctx.clearRect(0, 0, imageWidth, imageHeight)
-      if (currentFrameIndex > -1 && currentFrameIndex < 176) {
-        ctx.drawImage(images[currentFrameIndex], 0, 0)
+
+      const diff = Math.abs(currentFrameIndex - targetFrameIndex)
+      if (currentFrameIndex > -1 && currentFrameIndex < imageCount) {
+        if (diff < delayTime) {
+          setTimeout(() => {
+            ctx.drawImage(images[currentFrameIndex], 0, 0)
+          }, delayTime[diff])
+        } else {
+          ctx.drawImage(images[currentFrameIndex], 0, 0)
+        }
       }
     }
 
