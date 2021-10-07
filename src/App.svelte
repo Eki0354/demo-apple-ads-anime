@@ -19,6 +19,7 @@
   let ctx = null
 
   let currentScrollTop = 0
+  let isScrolling = false
 
   // 当前帧下标（img标签）
   let currentFrameIndex = -1
@@ -62,7 +63,6 @@
     const rx = canvasWidth / imageWidth
     const ry = canvasHeight / imageHeight
     canvasDom.style.transform = `scale(${Math.min(rx, ry)})`
-    console.log(rx, ry)
 
     // 高宽至少一屏，防止无法触发滚动事件
     imageSectionDom.style.width = canvasWidth + 'px'
@@ -74,11 +74,15 @@
   function initEvent() {
     window.addEventListener('resize', initClient)
     imageSectionDom.addEventListener('scroll', handleImagesScroll)
+    imageSectionDom.addEventListener('scrollstart', handleImageScrollStart)
+    imageSectionDom.addEventListener('scrollstop', handleImageScrollStop)
   }
 
   function removeEvent() {
     window.removeEventListener('resize', initClient)
     imageSectionDom.removeEventListener('scroll', handleImagesScroll)
+    imageSectionDom.removeEventListener('scrollstart', handleImageScrollStart)
+    imageSectionDom.removeEventListener('scrollstop', handleImageScrollStop)
   }
 
   function loadImages() {
@@ -117,8 +121,10 @@
     })
   }
 
-  function play() {
-    if (currentFrameIndex !== targetFrameIndex) {
+  function play(timestamp) {
+    const isProgressing = currentFrameIndex !== targetFrameIndex
+
+    if (isProgressing) {
       currentFrameIndex < targetFrameIndex
         ? currentFrameIndex++
         : currentFrameIndex--
@@ -128,7 +134,7 @@
       }
     }
 
-    requestAnimationFrame(play)
+    if (isProgressing || isScrolling) requestAnimationFrame(play)
   }
 
   function handleImagesScroll(e) {
@@ -137,6 +143,15 @@
 
     const diffIndex = Math.round(diff / hpf)
     targetFrameIndex += diffIndex
+    play()
+  }
+
+  function handleImageScrollStart(e) {
+    isScrolling = true
+  }
+
+  function handleImageScrollStop(e) {
+    isScrolling = false
   }
 </script>
 
