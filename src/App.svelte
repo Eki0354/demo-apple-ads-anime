@@ -36,12 +36,10 @@
     isLoading = false
 
     setTimeout(() => {
-      initClient()
-
       // 等待图片加载完成后才监听事件
       initEvent()
 
-      play()
+      initClient()
     }, 0)
   })
 
@@ -61,13 +59,16 @@
     imageSectionDom.scrollTo(0, scrollTop)
     currentScrollTop = scrollTop
 
-    const rx = imageWidth / canvasWidth
-    const ry = imageHeight / canvasHeight
+    const rx = canvasWidth / imageWidth
+    const ry = canvasHeight / imageHeight
     canvasDom.style.transform = `scale(${Math.min(rx, ry)})`
+    console.log(rx, ry)
 
     // 高宽至少一屏，防止无法触发滚动事件
     imageSectionDom.style.width = canvasWidth + 'px'
     imageSectionDom.style.height = canvasHeight + 'px'
+
+    play()
   }
 
   function initEvent() {
