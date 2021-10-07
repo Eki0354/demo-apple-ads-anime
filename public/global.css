@@ -66,3 +66,13 @@ button:not(:disabled):active {
 button:focus {
   border-color: #666;
 }
+
+body ~ .img {
+  display: none;
+}
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
